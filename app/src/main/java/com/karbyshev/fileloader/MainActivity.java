@@ -8,15 +8,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements FileLoader.DownloadingStateCallback {
     private final String MY = "https://www.sample-videos.com/video/mp4/240/big_buck_bunny_240p_1mb.mp4";
 
-    private Button button;
-    private TextView textView;
+    private Button mDownloadButton;
+    private TextView mShowFilePathTextView;
     private ProgressDialog mProgressDialog;
     private FileLoader fileLoader = FileLoader.getInstance();
 
@@ -26,16 +25,16 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = (TextView)findViewById(R.id.myTextView);
-        textView.setOnClickListener(new View.OnClickListener() {
+        mShowFilePathTextView = (TextView)findViewById(R.id.myTextView);
+        mShowFilePathTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 playMedia(fileLoader.getMyFilePath());
             }
         });
 
-        button = (Button) findViewById(R.id.myButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        mDownloadButton = (Button) findViewById(R.id.myButton);
+        mDownloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!fileLoader.isDownloadingInProgress()) {
@@ -93,9 +92,9 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
     }
 
     public void doVisibilityChange(){
-        button.setVisibility(View.INVISIBLE);
-        textView.setVisibility(View.VISIBLE);
-        textView.setText(fileLoader.getMyFilePath());
+        mDownloadButton.setVisibility(View.INVISIBLE);
+        mShowFilePathTextView.setVisibility(View.VISIBLE);
+        mShowFilePathTextView.setText(fileLoader.getMyFilePath());
     }
 }
 
