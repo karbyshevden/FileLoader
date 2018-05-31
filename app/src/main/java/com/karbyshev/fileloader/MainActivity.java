@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity implements FileLoader.DownloadingStateCallback {
     private final String MY = "https://www.sample-videos.com/video/mp4/240/big_buck_bunny_240p_1mb.mp4";
 
@@ -19,17 +21,17 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
     private ProgressDialog mProgressDialog;
     private FileLoader fileLoader = FileLoader.getInstance();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mShowFilePathTextView = (TextView)findViewById(R.id.myTextView);
+        mShowFilePathTextView.setText(MY);
         mShowFilePathTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playMedia(fileLoader.getMyFilePath());
+                playMedia(getExternalFilesDir(null) + "/local.mp4");
             }
         });
 
@@ -39,7 +41,9 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
             public void onClick(View v) {
                 if (!fileLoader.isDownloadingInProgress()) {
                     showProgressDialog();
-                    fileLoader.downloadFile(MY, getExternalFilesDir(null) + "/local.mp4", MainActivity.this);
+                    fileLoader.downloadFile(MY,
+                            getExternalFilesDir(null) + "/local.mp4",
+                            MainActivity.this);
                 }
             }
         });
@@ -48,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
             showProgressDialog();
             fileLoader.subscribe(this);
         }
+
+        checkLocalFile();
     }
 
     @Override
@@ -56,9 +62,16 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
         fileLoader.unsubscribe();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        checkLocalFile();
+    }
+
     private void showProgressDialog() {
         mProgressDialog = new ProgressDialog(MainActivity.this);
-        mProgressDialog.setMessage("A message");
+        mProgressDialog.setMessage("Downloading...");
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(false);
@@ -76,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
     public void onDownloadingComplete(String filePath) {
         Toast.makeText(this, "File downloaded", Toast.LENGTH_SHORT).show();
         mProgressDialog.dismiss();
-        doVisibilityChange();
+
+        checkLocalFile();
     }
 
     @Override
@@ -91,10 +105,18 @@ public class MainActivity extends AppCompatActivity implements FileLoader.Downlo
         startActivity(intent);
     }
 
-    public void doVisibilityChange(){
-        mDownloadButton.setVisibility(View.INVISIBLE);
-        mShowFilePathTextView.setVisibility(View.VISIBLE);
-        mShowFilePathTextView.setText(fileLoader.getMyFilePath());
+    private void checkLocalFile(){
+        File file = new File(getExternalFilesDir(null) + "/local.mp4");
+        if (file.exists()){
+            mShowFilePathTextView.setClickable(true);
+            mShowFilePathTextView.setTextColor(getResources().getColor(R.color.colorPrimary));
+            mDownloadButton.setClickable(false);
+            mDownloadButton.setBackgroundColor(getResources().getColor(R.color.colorDisable));
+        } else {
+            mShowFilePathTextView.setClickable(false);
+            mShowFilePathTextView.setTextColor(getResources().getColor(R.color.colorDisable));
+            mDownloadButton.setClickable(true);
+        }
     }
 }
 

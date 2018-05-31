@@ -205,8 +205,4 @@ public class FileLoader {
             this.destFileName = destFileName;
         }
     }
-
-    public String getMyFilePath() {
-        return myFilePath;
-    }
 }
